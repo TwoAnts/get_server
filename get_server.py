@@ -12,30 +12,37 @@ post_headers = {
 }
 
 url_login = 'http://115.156.209.252/dcms/userlogin.php'
+url_apply = 'http://115.156.209.252/dcms/applyins.php?ins_id='
 
 username = 'M201672711'
 passwd = '123456'
 
+opener = None
 
-def login(data):
+def login(**data):
 	post_data = urllib.urlencode(data)
-	cj=cookielib.CookieJar()   
-	opener=urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+	cj = cookielib.CookieJar()   
+	global opener
+	opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 	req = urllib2.Request(url_login, post_data, post_headers)
-	content=opener.open(req)
+	content = opener.open(req)
 	
 	return content.read().decode('utf-8')
+	
+def apply(**data):
+    post_data = urllib.urlencode(data)
+    url_apply_ = url_apply + data['ins_id']
+    req = urllib2.Request(url_apply_, post_data, post_headers)
+    global opener
+    content = opener.open(req)
+    return content.read().decode('utf-8')
+	
 	
 
 	
 if __name__ == '__main__':
-	data = {
-		'username': username,
-		'password': passwd,
-		'submit': 'login',
-	}
 	
-	result = login(data)
+	result = login(username=username, password=passwd, submit='login')
 	soup = BeautifulSoup(result, "html.parser")
 	
 	is_relax = {}
@@ -48,6 +55,11 @@ if __name__ == '__main__':
 			relaxs.append(td.a.text)
 
 	print 'relaxs:%s' %','.join(relaxs)
+	
+	result = apply(sel_num=1, ins_id=relaxs[0])
+	
+	
+	
 	
 	
 	
