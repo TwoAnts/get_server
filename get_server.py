@@ -30,13 +30,16 @@ url_myins = 'myins.php'
 url_throw = 'abandonapply.php'
 url_logout = 'logout.php'
 
-username = 'M201672711'
-passwd = '123456'
+
+queue = [('M201672711', '123456'), ('M201672696', '123456')]
 
 ins_id_pattern = re.compile(u'ca\d{2}')
 ins_id_exculde = ['ca32']
 
 opener = None
+
+def mlog(str):
+    print '[%s] %s' %(datetime.now(), str)
 
 def resp2soup(resp):
     return BeautifulSoup(resp.read().decode('utf-8'), 'html.parser')
@@ -121,6 +124,23 @@ def get_relaxs():
                 relaxs.append(td.a.text)
     
     return relaxs
+    
+def is_need(ins_id, ins_id_pattern=None, ins_id_exculde=None):
+    if ins_id_pattern and not ins_id_pattern.match(ins_id):
+        return False
+    if ins_id_exculde and ins_id in ins_id_exculde:
+        return False
+    return True
+    
+def get_one_need():
+    resp = get(url_index)
+    soup = resp2soup(resp)
+    relaxs = []
+    for td in soup.find_all('td'):
+        if hasattr(td, 'font') and hasattr(td, 'a') and td.font.color == 'green':
+                if is_need(td.a.text):
+                    return td.a.text
+    return None
             
 def get_need(relaxs, ins_id_pattern=None, ins_id_exculde=None):
     relaxs = get_relaxs()
@@ -152,20 +172,20 @@ def print_ins_map(ins_map):
     for line in kvlist:
         print '%s:%s' %line
         
-def loginout_exec(func, **kwargs):
+def loginout_exec(func, username, passwd, **kwargs):
     return_result = None
     try:
-        print 'login'
+        mlog('login')
         resp = login(username=username, password=passwd)
         if func:
-            print 'exec...'
+            mlog('exec...')
             return_result = func(login_resp = resp, **kwargs)
 
     except Exception as e:
         print traceback.format_exc()
     finally:
         resp = logout()
-        print 'logout'
+        mlog('logout')
         return return_result
     
     
@@ -183,12 +203,12 @@ def to_get_list(login_resp=None, **kwargs):
         else:
             not_relax_map[td.a.text] = get_detail(td.a.text)
 
-    print 'relaxs:%s' %','.join(relaxs)
+    #print 'relaxs:%s' %','.join(relaxs)
     #print_ins_map(not_relax_map)
     
     todo_list = get_list_to_apply(not_relax_map)
-    for line in todo_list:
-        print '%s: %s' %(line[0], line[-1])
+    #for line in todo_list:
+        #print '%s: %s' %(line[0], line[-1])
         
         
     #result = apply(sel_num=1, ins_id=relaxs[0])
@@ -223,17 +243,23 @@ def throw_one(login_resp=None, ins_id=None, user_id=None):
     return None
     
     
-def apply_run(end_date=None):
+def apply_run(login_resp=None, end_date=None):
     while True:
         if end_date < datetime.now():
-            return
-        relaxs = get_relaxs()
-        relaxs = get_need(relaxs)
-        ins_id = apply_one(todo_list=relaxs)
-        if ins_id:
-            print 'applyed:%s' %ins_id
-            return
-        time.sleep(1000)
+            #print 'enddata come! quit this loop! %s' %datetime.now()
+            return None
+        need = get_one_need()
+        if not need:
+            #mlog('no need found!')
+            time.sleep(1)
+            continue
+            
+        apply(need)
+        if check_my(need):
+            #print 'applyed:%s' %(need)
+            return need
+            
+        time.sleep(0.5)
     
     
         
@@ -248,10 +274,62 @@ def apply_loop(login_resp=None, end_date=None):
     
         
 if __name__ == '__main__':
-    not_relax_map, relaxs, todo_list = loginout_exec(to_get_list)
-    ins_id = loginout_exec(apply_one, todo_list=['gd09'])
-    print 'apply ', ins_id
-    print 'throw ', loginout_exec(throw_one, ins_id=ins_id, user_id=username)
+    ins_id_queue = []
+    need_len = len(queue)
+    not_relax_map, relaxs, todo_list = loginout_exec(to_get_list, username='M201672711', passwd='123456')
+    
+    now = datetime.now()
+    main_enddate = now + timedelta(days=1)
+    
+    todo_list = filter(lambda e: e[-1] < main_enddate, todo_list)
+    
+    print todo_list
+    print ''
+    
+    #print type(todo_list[0][-1]), type(datetime.now())
+    #exit(0)
+    
+    #todo_list = [('ca01', now, now+timedelta(seconds=5))]
+    
+    mlog('start mainloop!')
+    while todo_list:
+        one = todo_list.pop(0)
+        #print '%s %s %s' %(one[0], one[1], one[2])
+        notify = one[-1] - datetime.now()
+        if notify:
+            notify = notify.total_seconds()
+            
+        if notify < -120:
+            continue
+        elif notify > 0:
+            mlog('sleep %ss, notify on %s for %s' %(notify, one[-1], one[0]))
+            time.sleep(notify)
+        
+        mlog('work')
+        while len(ins_id_queue) < len(queue):
+            user = queue[len(ins_id_queue)]
+            mlog('start %s to apply' % user[0])
+            ins_id = loginout_exec(apply_run, end_date=(one[2] + timedelta(seconds=3)), username=user[0], passwd=user[1])
+            if ins_id:
+                mlog('%s apply %s' %(user[0], ins_id))
+                ins_id_queue.push(ins_id)
+                continue                   
+            else:
+                mlog('no ins_id applyed, to next loop------>')
+                break
+        
+        if len(ins_id_queue) > len(queue):
+            break
+                 
+    mlog('stop')
+    
+    for i in xrange(len(ins_id_queue)):
+        print queue[i], ins_id_queue[i]
+    
+    print '%s/%s done!' %(len(ins_id_queue), len(queue))
+    #ins_id = loginout_exec(apply_one, todo_list=['gd09'])
+    #print 'apply ', ins_id
+    #print 'throw ', loginout_exec(throw_one, ins_id=ins_id, user_id=username)
     
     
     
