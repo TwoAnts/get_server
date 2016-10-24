@@ -6,6 +6,7 @@ import urllib2
 import cookielib
 import traceback
 import time
+import os
 from datetime import datetime
 from datetime import timedelta
 from bs4 import BeautifulSoup
@@ -132,13 +133,13 @@ def is_need(ins_id, ins_id_pattern=None, ins_id_exculde=None):
         return False
     return True
     
-def get_one_need():
+def get_one_need(ins_id_pattern=None, ins_id_exculde=None):
     resp = get(url_index)
     soup = resp2soup(resp)
     relaxs = []
     for td in soup.find_all('td'):
         if hasattr(td, 'font') and hasattr(td, 'a') and td.font.color == 'green':
-                if is_need(td.a.text):
+                if is_need(td.a.text, ins_id_pattern=ins_id_pattern, ins_id_exculde=ins_id_exculde):
                     return td.a.text
     return None
             
@@ -248,7 +249,7 @@ def apply_run(login_resp=None, end_date=None):
         if end_date < datetime.now():
             #print 'enddata come! quit this loop! %s' %datetime.now()
             return None
-        need = get_one_need()
+        need = get_one_need(ins_id_pattern=ins_id_pattern, ins_id_exculde=ins_id_exculde)
         if not need:
             #mlog('no need found!')
             time.sleep(1)
@@ -280,6 +281,8 @@ if __name__ == '__main__':
     
     now = datetime.now()
     main_enddate = now + timedelta(days=1)
+    print todo_list
+    exit(0)
     
     todo_list = filter(lambda e: e[-1] < main_enddate, todo_list)
     
@@ -309,7 +312,7 @@ if __name__ == '__main__':
         while len(ins_id_queue) < len(queue):
             user = queue[len(ins_id_queue)]
             mlog('start %s to apply' % user[0])
-            ins_id = loginout_exec(apply_run, end_date=(one[2] + timedelta(seconds=3)), username=user[0], passwd=user[1])
+            ins_id = loginout_exec(apply_run, end_date=(one[2] + timedelta(seconds=65)), username=user[0], passwd=user[1])
             if ins_id:
                 mlog('%s apply %s' %(user[0], ins_id))
                 ins_id_queue.push(ins_id)
@@ -327,6 +330,7 @@ if __name__ == '__main__':
         print queue[i], ins_id_queue[i]
     
     print '%s/%s done!' %(len(ins_id_queue), len(queue))
+    os.system('pause')
     #ins_id = loginout_exec(apply_one, todo_list=['gd09'])
     #print 'apply ', ins_id
     #print 'throw ', loginout_exec(throw_one, ins_id=ins_id, user_id=username)
