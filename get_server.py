@@ -32,7 +32,9 @@ url_throw = 'abandonapply.php'
 url_logout = 'logout.php'
 
 
-queue = [('M201672711', '123456'), ('M201672696', '123456')]
+queue = [('M201672711', '123456'),
+ #('M201672696', '123456')
+ ]
 
 ins_id_pattern = re.compile(u'ca\d{2}')
 ins_id_exculde = ['ca32']
@@ -242,7 +244,21 @@ def throw_one(login_resp=None, ins_id=None, user_id=None):
         return ins_id
     
     return None
-    
+   
+def apply_one_run(login_resp=None, end_date=None, ins_id=None):
+    if not ins_id or not end_date:
+        return None
+        
+    while True:
+        if end_date < datetime.now():
+            #print 'enddata come! quit this loop! %s' %datetime.now()
+            return None
+        apply(ins_id)
+        if check_my(ins_id):
+            #print 'applyed:%s' %(need)
+            return ins_id
+            
+        time.sleep(1)   
     
 def apply_run(login_resp=None, end_date=None):
     while True:
@@ -281,8 +297,8 @@ if __name__ == '__main__':
     
     now = datetime.now()
     main_enddate = now + timedelta(days=1)
-    print todo_list
-    exit(0)
+    #print todo_list
+    #exit(0)
     
     todo_list = filter(lambda e: e[-1] < main_enddate, todo_list)
     
@@ -312,7 +328,8 @@ if __name__ == '__main__':
         while len(ins_id_queue) < len(queue):
             user = queue[len(ins_id_queue)]
             mlog('start %s to apply' % user[0])
-            ins_id = loginout_exec(apply_run, end_date=(one[2] + timedelta(seconds=65)), username=user[0], passwd=user[1])
+            ins_id = loginout_exec(apply_one_run, end_date(one[2] + timedelta(seconds=120)), ins_id='ca15', username=user[0], password=user[1])
+            #ins_id = loginout_exec(apply_run, end_date=(one[2] + timedelta(seconds=65)), username=user[0], passwd=user[1])
             if ins_id:
                 mlog('%s apply %s' %(user[0], ins_id))
                 ins_id_queue.push(ins_id)
@@ -323,7 +340,7 @@ if __name__ == '__main__':
         
         if len(ins_id_queue) > len(queue):
             break
-                 
+           
     mlog('stop')
     
     for i in xrange(len(ins_id_queue)):
