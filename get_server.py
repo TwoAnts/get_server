@@ -292,6 +292,7 @@ def apply_loop(login_resp=None, end_date=None):
     
         
 if __name__ == '__main__':
+
     ins_id_queue = []
     need_len = len(queue)
     not_relax_map, relaxs, todo_list = loginout_exec(to_get_list, username='M201672711', passwd='123456')
@@ -329,8 +330,8 @@ if __name__ == '__main__':
         while len(ins_id_queue) < len(queue):
             user = queue[len(ins_id_queue)]
             mlog('start %s to apply' % user[0])
-            #ins_id = loginout_exec(apply_one_run, end_date=(one[2] + timedelta(seconds=120)), ins_id='ca15', username=user[0], password=user[1])
-            ins_id = loginout_exec(apply_run, end_date=(one[2] + timedelta(seconds=65)), username=user[0], passwd=user[1])
+            #ins_id = loginout_exec(apply_one_run, username=user[0], passwd=user[1], end_date=(one[2] + timedelta(seconds=120)), ins_id='ca15')
+            ins_id = loginout_exec(apply_run, username=user[0], passwd=user[1], end_date=(one[2] + timedelta(seconds=65)))
             if ins_id:
                 mlog('%s apply %s' %(user[0], ins_id))
                 ins_id_queue.push(ins_id)
@@ -348,7 +349,6 @@ if __name__ == '__main__':
         print queue[i], ins_id_queue[i]
     
     print '%s/%s done!' %(len(ins_id_queue), len(queue))
-    os.system('pause')
     #ins_id = loginout_exec(apply_one, todo_list=['gd09'])
     #print 'apply ', ins_id
     #print 'throw ', loginout_exec(throw_one, ins_id=ins_id, user_id=username)
