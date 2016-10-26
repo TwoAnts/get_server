@@ -1,4 +1,5 @@
 #-*- coding:utf-8 -*-
+#! /usr/bin/python
 
 import re
 import urllib
@@ -328,8 +329,8 @@ if __name__ == '__main__':
         while len(ins_id_queue) < len(queue):
             user = queue[len(ins_id_queue)]
             mlog('start %s to apply' % user[0])
-            ins_id = loginout_exec(apply_one_run, end_date(one[2] + timedelta(seconds=120)), ins_id='ca15', username=user[0], password=user[1])
-            #ins_id = loginout_exec(apply_run, end_date=(one[2] + timedelta(seconds=65)), username=user[0], passwd=user[1])
+            #ins_id = loginout_exec(apply_one_run, end_date=(one[2] + timedelta(seconds=120)), ins_id='ca15', username=user[0], password=user[1])
+            ins_id = loginout_exec(apply_run, end_date=(one[2] + timedelta(seconds=65)), username=user[0], passwd=user[1])
             if ins_id:
                 mlog('%s apply %s' %(user[0], ins_id))
                 ins_id_queue.push(ins_id)
