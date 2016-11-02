@@ -22,6 +22,7 @@ def mlog(s):
                 out.write(msg)
     else:
         f = datetime.strftime(datetime.now(), '%Y_%m_%d.log')
+        f = os.path.join(CUR_DIR, f)
         with open(f, 'a') as out:
             out.write(msg)
         
