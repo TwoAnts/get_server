@@ -12,6 +12,9 @@ from datetime import datetime
 from datetime import timedelta
 from bs4 import BeautifulSoup
 
+import gs_log
+gs_log.SAVE_LOG=True
+
 from gs_log import mlog
 
 get_headers = {

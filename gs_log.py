@@ -14,6 +14,7 @@ def mlog(s):
 
     if not SAVE_LOG:
         return
+    msg = '%s\n' %msg
 
     if TARGETS:
         for f in TARGETS:
