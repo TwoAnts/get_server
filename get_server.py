@@ -42,15 +42,19 @@ ins_id_exculde = ['ca32']
 
 opener = None
 
-def wraper(func, **kwargs):
-    new_kw = {}
-    for name in func.func_code.co_varnames:
-        new_kw[name] = kwargs.get(name, None)
-        if not new_kw[name]:
-            mlog('func %s need %s arg!' %(func.func_name, name))
-            return None
-    
-    return func(**new_kw)
+def wraper(func):
+    def w(**kwargs):
+        new_kw = {}
+        #print func.func_name
+        #print func.func_code.co_varnames
+        for i in xrange(func.func_code.co_argcount):
+            name = func.func_code.co_varnames[i]
+            new_kw[name] = kwargs.get(name, None)
+            if not new_kw[name]:
+                mlog('func %s need %s arg!' %(func.func_name, name))
+                return None
+        return func(**new_kw)
+    return w
         
         
 def mlog(str):
