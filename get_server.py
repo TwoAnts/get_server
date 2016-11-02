@@ -1,5 +1,5 @@
-#-*- coding:utf-8 -*-
 #!/usr/bin/python
+#-*- coding:utf-8 -*-
 
 import re
 import urllib
@@ -194,7 +194,7 @@ def print_ins_map(ins_map):
 def loginout_exec(func, username, passwd, **kwargs):
     return_result = None
     try:
-        mlog('login')
+        mlog('login %s' %username)
         resp = login(username=username, password=passwd)
         if func:
             mlog('exec...')
@@ -311,6 +311,10 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     start_date = detail['end_date'] + timedelta(seconds=1)
     notify = start_date - datetime.now()
     notify = notify.total_seconds()
+    if notify > 24 * 60 *60:
+        mlog('too long time to wait. exit!')
+        return 
+
     if notify > 0:
         mlog('sleep to %s' %start_date)
         time.sleep(notify)
