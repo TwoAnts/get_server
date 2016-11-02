@@ -1,5 +1,5 @@
 #-*- coding:utf-8 -*-
-#! /usr/bin/python
+#!/usr/bin/python
 
 import re
 import urllib
@@ -42,6 +42,17 @@ ins_id_exculde = ['ca32']
 
 opener = None
 
+def wraper(func, **kwargs):
+    new_kw = {}
+    for name in func.func_code.co_varnames:
+        new_kw[name] = kwargs.get(name, None)
+        if not new_kw[name]:
+            mlog('func %s need %s arg!' %(func.func_name, name))
+            return None
+    
+    return func(**new_kw)
+        
+        
 def mlog(str):
     print '[%s] %s' %(datetime.now(), str)
 
@@ -183,7 +194,8 @@ def loginout_exec(func, username, passwd, **kwargs):
         resp = login(username=username, password=passwd)
         if func:
             mlog('exec...')
-            return_result = func(login_resp = resp, **kwargs)
+            kwargs['login_resp'] = resp
+            return_result = func(**kwargs)
 
     except Exception as e:
         print traceback.format_exc()
@@ -289,19 +301,45 @@ def apply_loop(login_resp=None, end_date=None):
     
     thr.start()
     thr.join()
+
+def sleep_to_apply_one(ins_id, time_delta, username, passwd):
+    detail = loginout_exec(wraper(get_detail), username=username, passwd=passwd, ins_id=ins_id) 
+    start_date = detail['end_date'] + timedelta(seconds=1)
+    notify = start_date - datetime.now()
+    notify = notify.total_seconds()
+    if notify > 0:
+        mlog('sleep to %s' %start_date)
+        time.sleep(notify)
     
+    mlog('work...')
+    end_date = datetime.now() + time_delta
+    ins_id = loginout_exec(apply_one_run, username=username, passwd=passwd,\
+                                 end_date=end_date, ins_id=ins_id)
+    mlog('end!')
+    if ins_id:
+        mlog('get %s.' %ins_id)
+    
+
+
+
+def print_(l):
+    for line in l:
+        print line 
         
 if __name__ == '__main__':
 
+    '''
     ins_id_queue = []
     need_len = len(queue)
     not_relax_map, relaxs, todo_list = loginout_exec(to_get_list, username='M201672711', passwd='123456')
     
     now = datetime.now()
     main_enddate = now + timedelta(days=1)
-    #print todo_list
-    #exit(0)
+    print_(todo_list)
+    exit(0)
+    '''
     
+    '''
     todo_list = filter(lambda e: e[-1] < main_enddate, todo_list)
     
     print todo_list
@@ -352,19 +390,11 @@ if __name__ == '__main__':
     #ins_id = loginout_exec(apply_one, todo_list=['gd09'])
     #print 'apply ', ins_id
     #print 'throw ', loginout_exec(throw_one, ins_id=ins_id, user_id=username)
+    '''
+    ins_id = 'ca15'
+    tl = timedelta(seconds=120)
+    username = 'M201672711'
+    passwd = '123456'
+    sleep_to_apply_one(ins_id, tl, username, passwd)
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
 
