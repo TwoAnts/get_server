@@ -12,6 +12,8 @@ from datetime import datetime
 from datetime import timedelta
 from bs4 import BeautifulSoup
 
+from gs_log import mlog
+
 get_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
@@ -56,9 +58,10 @@ def wraper(func):
         return func(**new_kw)
     return w
         
-        
+'''        
 def mlog(str):
     print '[%s] %s' %(datetime.now(), str)
+'''
 
 def resp2soup(resp):
     return BeautifulSoup(resp.read().decode('utf-8'), 'html.parser')
@@ -405,4 +408,3 @@ if __name__ == '__main__':
     passwd = '123456'
     sleep_to_apply_one(ins_id, tl, username, passwd)
     
-
