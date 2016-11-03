@@ -276,6 +276,13 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
         if end_date < datetime.now():
             #print 'enddata come! quit this loop! %s' %datetime.now()
             return None
+
+        owner = get_owner(ins_id)
+        if owrner:
+            time.sleep(0.5)
+            continue
+        #work when no owner
+
         apply(ins_id)
         if check_my(ins_id):
             #print 'applyed:%s' %(need)
@@ -314,7 +321,7 @@ def apply_loop(login_resp=None, end_date=None):
 
 def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     detail = loginout_exec(wraper(get_detail), username=username, passwd=passwd, ins_id=ins_id) 
-    start_date = detail['end_date'] + timedelta(seconds=1)
+    start_date = detail['end_date']
     notify = start_date - datetime.now()
     notify = notify.total_seconds()
     if notify > 24 * 60 *60:
@@ -406,7 +413,7 @@ if __name__ == '__main__':
     #print 'throw ', loginout_exec(throw_one, ins_id=ins_id, user_id=username)
     '''
     ins_id = 'ca15'
-    tl = timedelta(seconds=120)
+    tl = timedelta(seconds=240)
     username = 'M201672711'
     passwd = '123456'
     sleep_to_apply_one(ins_id, tl, username, passwd)
