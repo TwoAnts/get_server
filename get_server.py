@@ -59,6 +59,7 @@ def wraper(func):
                 mlog('func %s need %s arg!' %(func.func_name, name))
                 return None
         return func(**new_kw)
+    w.func_name = func.func_name
     return w
         
 '''        
@@ -203,7 +204,7 @@ def loginout_exec(func, username, passwd, **kwargs):
         mlog('login %s' %username)
         resp = login(username=username, password=passwd)
         if func:
-            mlog('exec...')
+            mlog('exec %s ...' %func.func_name)
             kwargs['login_resp'] = resp
             return_result = func(**kwargs)
 
@@ -278,7 +279,7 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
             return None
 
         owner = get_owner(ins_id)
-        if owrner:
+        if owner:
             time.sleep(0.5)
             continue
         #work when no owner
@@ -322,6 +323,9 @@ def apply_loop(login_resp=None, end_date=None):
 def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     detail = loginout_exec(wraper(get_detail), username=username, passwd=passwd, ins_id=ins_id) 
     start_date = detail['end_date']
+    if not start_date:
+        start_date = datetime.now()
+
     notify = start_date - datetime.now()
     notify = notify.total_seconds()
     if notify > 24 * 60 *60:
@@ -332,8 +336,8 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
         mlog('sleep to %s' %start_date)
         time.sleep(notify)
     
-    mlog('work...')
     end_date = datetime.now() + time_delta
+    mlog('work until %s for %s seconds...' %(end_date, time_delta.total_seconds()))
     ins_id = loginout_exec(apply_one_run, username=username, passwd=passwd,\
                                  end_date=end_date, ins_id=ins_id)
     mlog('end!')
