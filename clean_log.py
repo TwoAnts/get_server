@@ -3,9 +3,14 @@
 import os
 from datetime import datetime, timedelta
 
+import gs_log
+gs_log.SAVE_LOG = True
+from gs_log import mlog
+
 CUR_DIR = os.path.abspath(os.path.dirname(__file__))
 
 if __name__ == '__main__':
+    mlog('clean logs.')
     now = datetime.now()
     # clean logs  before 7 days ago.
     before_start = now + timedelta(days=-7)
