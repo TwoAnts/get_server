@@ -1,6 +1,6 @@
 #Get Server
 
-To get my lab's server.  
+To get my laboratory's server.  
 No use for others.  
 
 ##Requirements
