@@ -10,7 +10,12 @@ import time
 import os
 from datetime import datetime
 from datetime import timedelta
+
 from bs4 import BeautifulSoup
+from dateutil.parser import parse as du_parse
+from dateutil import tz
+
+tzlocal = tz.tzlocal()
 
 import gs_log
 gs_log.SAVE_LOG=True
@@ -95,6 +100,18 @@ def post(url, get_params={}, **data):
 def get(url, **data):
     return request(url, get_params=data)
     
+def get_server_time():
+    '''
+    When your time not same as web server's time.
+    Use it's response's Date as your time.
+    '''
+    resp = get(url_login)
+    date = resp.headers.get('Date')
+    if date:
+        now_tz = du_parse(date)
+        now_tz = now_tz.astimezone(tz=tzlocal)
+        return now_tz.replace(tzinfo=None)
+    return None
 
 def login(username=None, password=None, submit='login'):
     return post(url_login, username=username, password=password, submit=submit)
@@ -324,9 +341,9 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     detail = loginout_exec(wraper(get_detail), username=username, passwd=passwd, ins_id=ins_id) 
     start_date = detail['end_date']
     if not start_date:
-        start_date = datetime.now()
+        start_date = get_server_time()
 
-    notify = start_date - datetime.now()
+    notify = start_date - get_server_time()
     notify = notify.total_seconds()
     if notify > 24 * 60 *60:
         mlog('too long time to wait. exit!')
@@ -336,6 +353,7 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
         mlog('sleep to %s' %start_date)
         time.sleep(notify)
     
+    mlog('server time is %s' %get_server_time())
     end_date = datetime.now() + time_delta
     mlog('work until %s for %s seconds...' %(end_date, time_delta.total_seconds()))
     ins_id = loginout_exec(apply_one_run, username=username, passwd=passwd,\
