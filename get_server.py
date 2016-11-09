@@ -127,7 +127,7 @@ def get_owner(ins_id):
     soup = BeautifulSoup(resp.read().decode('utf-8'), 'html.parser')
     owner_pre_tag = soup.find('td', text=u'使用人')
     if owner_pre_tag:
-        owner_tag = owner_pre_tag.next_element
+        owner_tag = owner_pre_tag.findNext('td')
         return owner_tag.text
     return None
     
@@ -226,7 +226,7 @@ def loginout_exec(func, username, passwd, **kwargs):
             return_result = func(**kwargs)
 
     except Exception as e:
-        print traceback.format_exc()
+        mlog(traceback.format_exc())
     finally:
         resp = logout()
         mlog('logout')
@@ -288,11 +288,15 @@ def throw_one(login_resp=None, ins_id=None, user_id=None):
    
 def apply_one_run(login_resp=None, end_date=None, ins_id=None):
     if not ins_id or not end_date:
+        mlog('end_date or ins_id is None!')
         return None
         
+    i = 0
     while True:
+        i += 1
         if end_date < datetime.now():
             #print 'enddata come! quit this loop! %s' %datetime.now()
+            mlog('try %s times.' %i)
             return None
 
         owner = get_owner(ins_id)
@@ -304,6 +308,7 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
         apply(ins_id)
         if check_my(ins_id):
             #print 'applyed:%s' %(need)
+            mlog('try %s times.' %i)
             return ins_id
             
         time.sleep(1)   
@@ -434,9 +439,15 @@ if __name__ == '__main__':
     #print 'apply ', ins_id
     #print 'throw ', loginout_exec(throw_one, ins_id=ins_id, user_id=username)
     '''
-    ins_id = 'ca15'
-    tl = timedelta(seconds=240)
-    username = 'M201672711'
-    passwd = '123456'
-    sleep_to_apply_one(ins_id, tl, username, passwd)
+    mlog('='*45)
+    try:
+        ins_id = 'ca15'
+        tl = timedelta(seconds=240)
+        username = 'M201672711'
+        passwd = '123456'
+        sleep_to_apply_one(ins_id, tl, username, passwd)
+    except Exception as e:
+        mlog(traceback.format_exc())
+    mlog('='*45)
+        
     
