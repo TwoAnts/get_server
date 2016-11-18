@@ -351,6 +351,7 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     notify = start_date - get_server_time()
     notify = notify.total_seconds()
     if notify > 24 * 60 *60:
+        mlog('free time is %s' %start_date)
         mlog('too long time to wait. exit!')
         return 
 
