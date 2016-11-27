@@ -301,7 +301,7 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
 
         owner = get_owner(ins_id)
         if owner:
-            time.sleep(0.5)
+            time.sleep(5)
             continue
         #work when no owner
 
@@ -311,7 +311,7 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
             mlog('try %s times.' %i)
             return ins_id
             
-        time.sleep(1)   
+        time.sleep(10)   
     
 def apply_run(login_resp=None, end_date=None):
     while True:
