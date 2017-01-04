@@ -75,6 +75,17 @@ def mlog(str):
 def resp2soup(resp):
     return BeautifulSoup(resp.read().decode('utf-8'), 'html.parser')
 
+def dumpresp(resp, save_body=False):
+    if not resp:
+        return
+    try:
+        msg = '%s %s\n%s\n%s\n' %(resp.code, resp.msg, resp.url, str(resp.headers))
+        if save_body:
+            msg = msg + resp.read().decode('utf-8')
+        mlog(msg)
+    except Exception as e:
+        mlog(traceback.format_exc())
+        
 def request(url, get_params={}, post_data={}):
     url_with_params = url_root + url
     if get_params:
@@ -291,12 +302,14 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
         mlog('end_date or ins_id is None!')
         return None
         
+    resp = None
     i = 0
     while True:
         i += 1
         if end_date < datetime.now():
             #print 'enddata come! quit this loop! %s' %datetime.now()
             mlog('try %s times.' %i)
+            dumpresp(resp, save_body=True)
             return None
 
         owner = get_owner(ins_id)
@@ -305,7 +318,7 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
             continue
         #work when no owner
 
-        apply(ins_id)
+        resp = apply(ins_id)
         if check_my(ins_id):
             #print 'applyed:%s' %(need)
             mlog('try %s times.' %i)
