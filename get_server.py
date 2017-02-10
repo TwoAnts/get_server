@@ -301,6 +301,10 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
     if not ins_id or not end_date:
         mlog('end_date or ins_id is None!')
         return None
+
+    if check_my(ins_id):
+        mlog('already my ins, don\'t need get.')
+        return None
         
     resp = None
     i = 0
