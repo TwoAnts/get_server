@@ -302,9 +302,14 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
         mlog('end_date or ins_id is None!')
         return None
 
-    if check_my(ins_id):
-        mlog('already my ins, don\'t need get.')
-        return None
+    detail = get_detail(ins_id)
+    end_date = detail['end_date']
+    if end_date:
+        delta = end_date - get_server_time()
+        if delta.total_seconds() >= 120:
+            mlog('already my ins. Don\'t need apply.')
+            return ins_id
+            
         
     resp = None
     i = 0
