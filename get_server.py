@@ -302,22 +302,13 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
         mlog('end_date or ins_id is None!')
         return None
 
-    detail = get_detail(ins_id)
-    end_date = detail['end_date']
-    if end_date:
-        delta = end_date - get_server_time()
-        if delta.total_seconds() >= 120:
-            mlog('already my ins. Don\'t need apply.')
-            return ins_id
-            
-        
     resp = None
     i = 0
     while True:
         i += 1
         if end_date < datetime.now():
             #print 'enddata come! quit this loop! %s' %datetime.now()
-            mlog('try %s times.' %i)
+            mlog('try %s times and failed.' %i)
             dumpresp(resp, save_body=True)
             return None
 
@@ -328,11 +319,21 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
         #work when no owner
 
         resp = apply(ins_id)
-        if check_my(ins_id):
-            #print 'applyed:%s' %(need)
-            mlog('try %s times.' %i)
-            return ins_id
-            
+
+        detail = get_detail(ins_id)
+        end_date = detail['end_date']
+        if end_date:
+            delta = end_date - get_server_time()
+            if delta.total_seconds() >= 3600:
+                #the server has been applyed by me or others.
+                mlog('%s seconds before release.' %delta.total_seconds())
+                               
+                if check_my(ins_id):
+                    mlog('try %s times and succeed.' %i)
+                    return ins_id
+                mlog('others get it.')
+                return None
+           
         time.sleep(10)   
     
 def apply_run(login_resp=None, end_date=None):
