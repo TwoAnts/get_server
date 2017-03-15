@@ -1,10 +1,8 @@
-#Get Server
-
+# Get Server #  
 To get my laboratory's server.  
 No use for others.  
 
-##Requirements
-
+## Requirements ##   
 - beautifulsoup4 
 - python-dateutil
 
