@@ -19,12 +19,12 @@ def mlog(s):
     if TARGETS:
         for f in TARGETS:
             with open(f, 'a') as out:
-                out.write(msg)
+                out.write(msg.encode('utf-8'))
     else:
         f = datetime.strftime(datetime.now(), '%Y_%m_%d.log')
         f = os.path.join(CUR_DIR, f)
         with open(f, 'a') as out:
-            out.write(msg)
+            out.write(msg.encode('utf-8'))
         
         
 

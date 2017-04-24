@@ -296,7 +296,7 @@ def throw_one(login_resp=None, ins_id=None, user_id=None):
         return ins_id
     
     return None
-   
+
 def apply_one_run(login_resp=None, end_date=None, ins_id=None):
     if not ins_id or not end_date:
         mlog('end_date or ins_id is None!')
@@ -305,12 +305,11 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
     resp = None
     i = 0
     while True:
-        i += 1
         if end_date < datetime.now():
             #print 'enddata come! quit this loop! %s' %datetime.now()
             mlog('try %s times and failed.' %i)
             dumpresp(resp, save_body=True)
-            return None
+            return -1
 
         owner = get_owner(ins_id)
         if owner:
@@ -319,11 +318,12 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
         #work when no owner
 
         resp = apply(ins_id)
+        i += 1
 
         detail = get_detail(ins_id)
-        end_date = detail['end_date']
-        if end_date:
-            delta = end_date - get_server_time()
+        expire_date = detail['end_date']
+        if expire_date:
+            delta = expire_date - get_server_time()
             if delta.total_seconds() >= 3600:
                 #the server has been applyed by me or others.
                 mlog('%s seconds before release.' %delta.total_seconds())
@@ -335,6 +335,7 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
                 return None
            
         time.sleep(10)   
+
     
 def apply_run(login_resp=None, end_date=None):
     while True:
@@ -374,7 +375,10 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     notify = start_date - get_server_time()
     notify = notify.total_seconds()
     if notify > 24 * 60 *60:
+        owner = loginout_exec(wraper(get_owner), username=username, 
+                              passwd=passwd, ins_id=ins_id) 
         mlog('free time is %s' %start_date)
+        mlog('owner is %s' %owner)
         mlog('too long time to wait. exit!')
         return 
 
@@ -387,12 +391,19 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     mlog('work until %s for %s seconds...' %(end_date, time_delta.total_seconds()))
     ins_id = loginout_exec(apply_one_run, username=username, passwd=passwd,\
                                  end_date=end_date, ins_id=ins_id)
+
+    while ins_id != -1: #enter long delay apply.
+        time.sleep(300)
+        end_date = datetime.now() + time_delta 
+        ins_id = loginout_exec(apply_one_run, username=username,
+                                 passwd=passwd, end_date=end_date,
+                                 ins_id=ins_id)
+        
+        
     mlog('end!')
     if ins_id:
         mlog('get %s.' %ins_id)
     
-
-
 
 def print_(l):
     for line in l:
@@ -466,7 +477,7 @@ if __name__ == '__main__':
     mlog('='*45)
     try:
         ins_id = 'ca15'
-        tl = timedelta(seconds=240)
+        tl = timedelta(seconds=600)
         username = 'M201672711'
         passwd = '123456'
         sleep_to_apply_one(ins_id, tl, username, passwd)
