@@ -10,7 +10,7 @@ TARGETS = []
 
 def mlog(s):
     msg = '[%s] %s' %(datetime.now(), s)
-    print msg
+    print msg.encode('utf-8')
 
     if not SAVE_LOG:
         return

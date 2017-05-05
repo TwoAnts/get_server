@@ -377,7 +377,7 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     if notify > 24 * 60 *60:
         owner = loginout_exec(wraper(get_owner), username=username, 
                               passwd=passwd, ins_id=ins_id) 
-        mlog('free time is %s' %start_date)
+        mlog('expire time is %s' %start_date)
         mlog('owner is %s' %owner)
         mlog('too long time to wait. exit!')
         return 
