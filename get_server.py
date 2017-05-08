@@ -392,7 +392,7 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     ins_id = loginout_exec(apply_one_run, username=username, passwd=passwd,\
                                  end_date=end_date, ins_id=ins_id)
 
-    while ins_id != -1: #enter long delay apply.
+    while ins_id == -1: #enter long delay apply.
         time.sleep(300)
         end_date = datetime.now() + time_delta 
         ins_id = loginout_exec(apply_one_run, username=username,
