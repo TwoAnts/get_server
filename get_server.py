@@ -32,7 +32,7 @@ post_headers = {
 }
 post_headers.update(get_headers)
 
-url_root = 'http://115.156.209.252/dcms/'
+url_root = 'http://115.156.135.252/dcms/'
 
 url_login = 'userlogin.php'
 url_index = 'index.php'
