@@ -23,8 +23,8 @@ No use for others.
     ```
 3. `crontab -e`
     ```
-    0 7 * * * /\<dir_path\>/get_server/get_server.py     #execute at 7:00 everyday
-    57 6 * * * /\<dir_path\>/get_server/clean_log.py     #execute at 6:57 everyday
-    @reboot /\<dir_path\>/get_server/get_server.py       #execute at reboot
+    0 7 * * * /<dir_path>/get_server/get_server.py     #execute at 7:00 everyday
+    57 6 * * * /<dir_path>/get_server/clean_log.py     #execute at 6:57 everyday
+    @reboot /<dir_path>/get_server/get_server.py       #execute at reboot
     ```
 
