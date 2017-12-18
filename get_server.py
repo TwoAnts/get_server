@@ -380,7 +380,7 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
         mlog('expire time is %s' %start_date)
         mlog('owner is %s' %owner)
         mlog('%ss. too long time to wait. exit!' %notify)
-        return 
+        return False
 
     if notify > 0:
         mlog('sleep to %s' %start_date)
@@ -392,17 +392,11 @@ def sleep_to_apply_one(ins_id, time_delta, username, passwd):
     ins_id = loginout_exec(apply_one_run, username=username, passwd=passwd,\
                                  end_date=end_date, ins_id=ins_id)
 
-    while ins_id == -1: #enter long delay apply.
-        time.sleep(300)
-        end_date = datetime.now() + time_delta 
-        ins_id = loginout_exec(apply_one_run, username=username,
-                                 passwd=passwd, end_date=end_date,
-                                 ins_id=ins_id)
-        
-        
     mlog('end!')
     if ins_id:
         mlog('get %s.' %ins_id)
+        return False
+    return True
     
 
 def print_(l):
@@ -474,15 +468,25 @@ if __name__ == '__main__':
     #print 'apply ', ins_id
     #print 'throw ', loginout_exec(throw_one, ins_id=ins_id, user_id=username)
     '''
-    mlog('='*45)
-    try:
-        ins_id = 'ca15'
-        tl = timedelta(seconds=600)
-        username = 'M201672711'
-        passwd = '123456'
-        sleep_to_apply_one(ins_id, tl, username, passwd)
-    except Exception as e:
-        mlog(traceback.format_exc())
-    mlog('='*45)
+    try_times = 0
+    while try_times < 5:
+        mlog('='*45)
+        next_try = False
+        try:
+            ins_id = 'ca15'
+            tl = timedelta(seconds=600)
+            username = 'M201672711'
+            passwd = '123456'
+            next_try = sleep_to_apply_one(ins_id, tl, username, passwd)
+        except Exception as e:
+            mlog(traceback.format_exc())
+        mlog('='*45)
+        if not next_try:
+            break
+        else:
+            time.sleep(180)
+            try_times += 1
+            mlog('try one more times.')
+
         
     
