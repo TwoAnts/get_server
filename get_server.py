@@ -484,7 +484,7 @@ if __name__ == '__main__':
         if not next_try:
             break
         else:
-            time.sleep(180)
+            time.sleep(5)
             try_times += 1
             mlog('try one more times.')
 
