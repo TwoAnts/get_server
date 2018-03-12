@@ -306,10 +306,10 @@ def apply_one_run(login_resp=None, end_date=None, ins_id=None):
     i = 0
     while True:
         if end_date < datetime.now():
-            #print 'enddata come! quit this loop! %s' %datetime.now()
+            #print 'enddate come! quit this loop! %s' %datetime.now()
             mlog('try %s times and failed.' %i)
             dumpresp(resp, save_body=True)
-            return -1
+            return None
 
         owner = get_owner(ins_id)
         if owner:
